@@ -1,8 +1,7 @@
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.abs
 
 private class Number (val value: Int, val x: Int, val y: Int)
-private class Symbol (val symbol: Char, val x: Int, val y: Int)
+private class Symbol (val value: Char, val x: Int, val y: Int)
 
 
 private fun getNumbers(lines: List<String>): Pair<List<Number>, List<Symbol>> {
@@ -29,25 +28,37 @@ private fun getNumbers(lines: List<String>): Pair<List<Number>, List<Symbol>> {
     return numbers.toList() to symbols.toList()
 }
 
-private fun checkPartNumber(number: Number, lines: List<String>): Boolean {
-    for (y in max(number.y - 1, 0) .. min(number.y + 1, lines.size - 1)) {
-        for (x in max(number.x - 1, 0) .. min(number.x + number.value.toString().length,lines[y].length - 1)) {
-            if (lines[y][x] !in '0'..'9' && lines[y][x] != '.') {
-                return true
-            }
+private fun getParts(symbol: Symbol, numbers: List<Number>): List<Number> {
+    return numbers.filter { isNeighbor(symbol, it) }.toList()
+}
+
+private fun isNeighbor(symbol: Symbol, number: Number): Boolean {
+    if (abs(symbol.y - number.y) <= 1) {
+        val deltaX = symbol.x - number.x
+        if (deltaX >= -1 && deltaX <= number.value.toString().length) {
+            return true
         }
     }
     return false
 }
 
+private fun calcSymbolGearRatio(symbol: Symbol, numbers: List<Number>): Int {
+    if (symbol.value != '*') { return 0 }
+    val neighborNumbers = numbers.filter { isNeighbor(symbol, it) }.toList()
+    if (neighborNumbers.size != 2) { return 0 }
+    return neighborNumbers.maxOf { it.value } * neighborNumbers.minOf { it.value }
+}
+
 private fun partA(lines: List<String>): Int {
     val (numbers, symbols) = getNumbers(lines)
-    val partNumbers = numbers.filter { checkPartNumber(it, lines) }
+    val partNumbers = symbols.map{getParts(it, numbers)}.flatten().toSet()
     return partNumbers.sumOf { it.value }
 }
 
-private fun partB(lines: List<String>): Int{
-    return 0
+private fun partB(lines: List<String>): Int {
+    val (numbers, symbols) = getNumbers(lines)
+    val gears = symbols.map{calcSymbolGearRatio(it, numbers)}
+    return gears.sumOf { it }
 }
 
 fun main() {
