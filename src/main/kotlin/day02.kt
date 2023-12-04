@@ -1,12 +1,12 @@
-data class Draw(val red: Int, val green: Int, val blue: Int)
-data class Game(val id: Int, val draws: List<Draw>)
+private data class Draw(val red: Int, val green: Int, val blue: Int)
+private data class Game(val id: Int, val draws: List<Draw>)
 
 
 private fun parseLines(lines: List<String>): List<Game> {
     val games = mutableListOf<Game>()
 
     for (line in lines) {
-        var draws = mutableListOf<Draw>()
+        val draws = mutableListOf<Draw>()
         val gameId = line.split(": ")[0].split(" ")[1].toInt()
         for (draw in line.split(": ")[1].split("; ")) {
             var red = 0; var green = 0; var blue = 0
