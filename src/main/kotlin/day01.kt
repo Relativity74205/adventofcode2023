@@ -1,25 +1,17 @@
 private val numbers: Map<String, String> = mapOf("zero" to "0", "one" to "1", "two" to "2", "three" to "3", "four" to "4", "five" to "5", "six" to "6", "seven" to "7", "eight" to "8", "nine" to "9")
 
 private fun findDigit(line: String): String {
-    for (c in line) {
-        if (c in '0'..'9') {
-            return c.toString()
-        }
-    }
+    line.forEach { if (it in '0'..'9') return it.toString() }
 
     return ""
 }
 
 private fun findDigitPlus(line: String, range: IntProgression): String {
-    for (c in range) {
-        if (line[c] in '0'..'9') {
-            return line[c].toString()
+    for (index in range) {
+        if (line[index] in '0'..'9') {
+            return line[index].toString()
         }
-        for (number in numbers.keys) {
-            if (line.substring(c).startsWith(number)) {
-                return numbers.getOrElse(number) { "" }
-            }
-        }
+        numbers.forEach{(numberString, number) -> if (line.substring(index).startsWith(numberString)) return number}
     }
 
     return ""
