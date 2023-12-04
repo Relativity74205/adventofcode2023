@@ -17,7 +17,7 @@ private fun findDigitPlus(line: String, range: IntProgression): String {
     return ""
 }
 
-private fun partA(lines: MutableList<String>): Int{
+private fun partA(lines: List<String>): Int{
     var result = 0
     for (line in lines) {
         val firstDigit = findDigit(line)
@@ -28,7 +28,7 @@ private fun partA(lines: MutableList<String>): Int{
     return result
 }
 
-private fun partB(lines: MutableList<String>): Int{
+private fun partB(lines: List<String>): Int{
     var result = 0
     for (line in lines) {
         val firstDigit = findDigitPlus(line, line.indices)
@@ -44,12 +44,8 @@ fun main() {
     val lineListDebug = readFile(1, true)
     val lineListDebugB = readFile(1, true, "B")
 
-    val resultADebug = partA(lineListDebug)
-    println("Part A Debug: $resultADebug")
-    val resultA = partA(lineList)
-    println("Part A: $resultA")
-    val resultBDebug = partB(lineListDebugB)
-    println("Part B Debug: $resultBDebug")
-    val resultB = partB(lineList)
-    println("Part B: $resultB")
+    println("Part A Debug: ${partA(lineListDebug)}")
+    println("Part A: ${partA(lineList)}")
+    println("Part B Debug: ${partB(lineListDebugB)}")
+    println("Part B: ${partB(lineList)}")
 }
