@@ -1,18 +1,18 @@
 import kotlin.math.pow
 
-private class Card(var copies: Int, val winningNumbers: Set<Int>, val numbers: Set<Int>) {
+private class ScratchCard(var copies: Int, val winningNumbers: Set<Int>, val numbers: Set<Int>) {
     fun matches(): Int {
         return this.numbers.intersect(this.winningNumbers).size
     }
 }
 
 
-private fun parseLines(lines: List<String>): List<Card> {
-    val cards = mutableListOf<Card>()
+private fun parseLines(lines: List<String>): List<ScratchCard> {
+    val cards = mutableListOf<ScratchCard>()
     for (line in lines) {
         val winningNumbers = line.split(": ")[1].split(" | ")[0].trim().split("  ", " ").map { it.trim().toInt() }
         val numbers = line.split(": ")[1].split(" | ")[1].trim().split("  ", " ").map { it.trim().toInt() }
-        cards.add(Card(1, winningNumbers.toSet(), numbers.toSet()))
+        cards.add(ScratchCard(1, winningNumbers.toSet(), numbers.toSet()))
     }
     return cards.toList()
 }
