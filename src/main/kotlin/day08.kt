@@ -1,3 +1,5 @@
+import java.math.BigInteger
+
 private class Node(val name: String, val left: String, val right: String)
 
 private fun parseLines(lines: List<String>): Map<String, Node> {
@@ -13,13 +15,10 @@ private fun parseLines(lines: List<String>): Map<String, Node> {
     return nodes.toMap()
 }
 
-private fun partA(lines: List<String>): Int {
-    val instructions = lines[0]
-    val nodes = parseLines(lines.slice(2..<lines.size))
-
+private fun findPathLength(startNode: Node, endNodeMarker: String, instructions: String, nodes: Map<String, Node>): Int {
     var count = 0
-    var currentNode: Node = nodes.getValue("AAA")
-    while (currentNode.name != "ZZZ") {
+    var currentNode: Node = startNode
+    while (!currentNode.name.endsWith(endNodeMarker)) {
         val char = instructions[count % instructions.length]
         currentNode = if (char == 'L') {
             nodes.getValue(currentNode.left)
@@ -31,27 +30,21 @@ private fun partA(lines: List<String>): Int {
     return count
 }
 
-private fun partB(lines: List<String>): Int {
+private fun partA(lines: List<String>): Int {
     val instructions = lines[0]
     val nodes = parseLines(lines.slice(2..<lines.size))
 
-    var count = 0
-    var currentNodes: List<Node> = nodes.values.filter { it.name.endsWith("A") }
-    while (!currentNodes.all { it.name.endsWith("Z") }) {
-        val char = instructions[count % instructions.length]
+    return findPathLength(nodes.getValue("AAA"), "ZZZ", instructions, nodes)
+}
 
-        val newCurrentNodes = mutableListOf<Node>()
-        for (currentNode in currentNodes) {
-            if (char == 'L') {
-                newCurrentNodes.add(nodes.getValue(currentNode.left))
-            } else {
-                newCurrentNodes.add(nodes.getValue(currentNode.right))
-            }
-        }
-        currentNodes = newCurrentNodes.toList()
-        count++
-    }
-    return count
+private fun partB(lines: List<String>): BigInteger {
+    val instructions = lines[0]
+    val nodes = parseLines(lines.slice(2..<lines.size))
+
+    val startNodes = nodes.values.filter { it.name.endsWith("A") }
+    val pathLengths = startNodes.map { findPathLength(it, "Z", instructions, nodes).toBigInteger() }
+
+    return pathLengths.fold(1.toBigInteger()) { acc, pathLength -> lcm(acc, pathLength) }
 }
 
 fun main() {
