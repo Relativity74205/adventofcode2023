@@ -1,39 +1,41 @@
-
-private enum class CardA(val value: Int){
-    A(14), K(13), Q(12), J(11), T(10), N9(9), N8(8), N7(7), N6(6), N5(5), N4(4), N3(3), N2(2)
-}
-private enum class CardB(val value: Int){
-    A(14), K(13), Q(12), T(10), N9(9), N8(8), N7(7), N6(6), N5(5), N4(4), N3(3), N2(2), J(1)
+private enum class Card {
+    A, K, Q, J, T, N9, N8, N7, N6, N5, N4, N3, N2
 }
 
 private enum class HandType{
     FiveOfAKind, FourOfAKind, FullHouse, ThreeOfAKind, TwoPair, OnePair, HighCard
 }
 
-private class Hand(val hand: String, val strength: Int): Comparable<Hand> {
+private class Hand(val hand: String, val strength: Int, val withJoker: Boolean): Comparable<Hand> {
 
-    private fun getCards(): List<CardA> {
+    private fun getCards(): List<Card> {
         return hand.map { char ->
             when(char) {
-                'A' -> CardA.A
-                'K' -> CardA.K
-                'Q' -> CardA.Q
-                'J' -> CardA.J
-                'T' -> CardA.T
-                '9' -> CardA.N9
-                '8' -> CardA.N8
-                '7' -> CardA.N7
-                '6' -> CardA.N6
-                '5' -> CardA.N5
-                '4' -> CardA.N4
-                '3' -> CardA.N3
-                '2' -> CardA.N2
+                'A' -> Card.A
+                'K' -> Card.K
+                'Q' -> Card.Q
+                'J' -> Card.J
+                'T' -> Card.T
+                '9' -> Card.N9
+                '8' -> Card.N8
+                '7' -> Card.N7
+                '6' -> Card.N6
+                '5' -> Card.N5
+                '4' -> Card.N4
+                '3' -> Card.N3
+                '2' -> Card.N2
                 else -> throw Exception("Unknown card")
             }
         }
     }
     fun getHandType(): HandType {
-        val cards = this.getCards().groupingBy { it }.eachCount()
+        val cards = this.getCards().groupingBy { it }.eachCount().toMutableMap()
+
+        if (withJoker && Card.J in cards.keys && cards.size > 1) {
+            val amountJ = cards.getOrElse(Card.J) { 0 }
+            cards.remove(Card.J)
+            cards[cards.maxBy { it.value }.key] = cards[cards.maxBy { it.value }.key]!! + amountJ
+        }
 
         return if (cards.values.contains(5)) {
             HandType.FiveOfAKind
@@ -57,95 +59,32 @@ private class Hand(val hand: String, val strength: Int): Comparable<Hand> {
             return other.getHandType().ordinal - this.getHandType().ordinal
         }
         for (index in this.getCards().indices) {
-            if (this.getCards()[index].value > other.getCards()[index].value) {
-                return 1
-            } else if (this.getCards()[index].value < other.getCards()[index].value) {
-                return -1
+            val thisCard = this.getCards()[index]
+            val thisCardValue = if (thisCard == Card.J && withJoker) 100 else thisCard.ordinal
+            val otherCard = other.getCards()[index]
+            val otherCardValue = if (otherCard == Card.J && withJoker) 100 else otherCard.ordinal
+            if (thisCardValue > otherCardValue) {
+                return -1  // if less than other
+            } else if (thisCardValue < otherCardValue) {
+                return 1  // if greater than other
             }
         }
         return 0
     }
 }
 
-private class HandB(val hand: String, val strength: Int): Comparable<HandB> {
-
-    private fun getCards(): List<CardB> {
-        return hand.map { char ->
-            when(char) {
-                'A' -> CardB.A
-                'K' -> CardB.K
-                'Q' -> CardB.Q
-                'J' -> CardB.J
-                'T' -> CardB.T
-                '9' -> CardB.N9
-                '8' -> CardB.N8
-                '7' -> CardB.N7
-                '6' -> CardB.N6
-                '5' -> CardB.N5
-                '4' -> CardB.N4
-                '3' -> CardB.N3
-                '2' -> CardB.N2
-                else -> throw Exception("Unknown card")
-            }
-        }
-    }
-    fun getHandType(): HandType {
-        val cards = this.getCards().groupingBy { it }.eachCount().toMutableMap()
-
-        if (CardB.J in cards.keys && cards.size > 1) {
-            val amountJ = cards.getOrElse(CardB.J) { 0 }
-            cards.remove(CardB.J)
-            cards[cards.maxBy { it.value }.key] = cards[cards.maxBy { it.value }.key]!! + amountJ
-        }
-
-        return if (cards.values.contains(5)) {
-            HandType.FiveOfAKind
-        } else if (cards.values.contains(4)) {
-            HandType.FourOfAKind
-        } else if (cards.values.contains(3) && cards.values.contains(2)) {
-            HandType.FullHouse
-        } else if (cards.values.contains(3)) {
-            HandType.ThreeOfAKind
-        } else if (cards.values.filter { it == 2 }.size == 2) {
-            HandType.TwoPair
-        } else if (cards.values.contains(2)) {
-            HandType.OnePair
-        } else {
-            HandType.HighCard
-        }
-    }
-
-    override fun compareTo(other: HandB): Int {
-        if (this.getHandType() != other.getHandType()) {
-            return other.getHandType().ordinal - this.getHandType().ordinal
-        }
-        for (index in this.getCards().indices) {
-            if (this.getCards()[index].value > other.getCards()[index].value) {
-                return 1
-            } else if (this.getCards()[index].value < other.getCards()[index].value) {
-                return -1
-            }
-        }
-        return 0
-    }
-}
-
-private fun parseLines(lines: List<String>): List<Hand> {
-    return lines.map { line -> Hand(line.split(" ")[0], line.split(" ")[1].toInt()) }
-}
-
-private fun parseLinesB(lines: List<String>): List<HandB> {
-    return lines.map { line -> HandB(line.split(" ")[0], line.split(" ")[1].toInt()) }
+private fun parseLines(lines: List<String>, withJoker: Boolean): List<Hand> {
+    return lines.map { line -> Hand(line.split(" ")[0], line.split(" ")[1].toInt(), withJoker)  }
 }
 
 private fun partA(lines: List<String>): Int {
-    val hands = parseLines(lines)
+    val hands = parseLines(lines, false)
     val handsSorted = hands.sorted()
     return handsSorted.mapIndexed { index, hand -> hand.strength * (index + 1) }.sum()
 }
 
 private fun partB(lines: List<String>): Int {
-    val hands = parseLinesB(lines)
+    val hands = parseLines(lines, true)
     val handsSorted = hands.sorted()
     return handsSorted.mapIndexed { index, hand -> hand.strength * (index + 1) }.sum()
 }
