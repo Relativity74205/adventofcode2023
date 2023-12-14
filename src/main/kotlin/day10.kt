@@ -90,7 +90,7 @@ private fun partA(lines: List<String>): Int {
         i++
     }
 
-    return (i / 2).toInt()
+    return i / 2
 }
 
 private fun partB(lines: List<String>): Int {
