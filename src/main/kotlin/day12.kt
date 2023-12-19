@@ -1,33 +1,47 @@
 private fun checkSpringGroup(springGroup: String, damagedSpringsShould: List<Int>): Boolean {
-    val damagedSpringsIs = springGroup.split(".").filter{it != ""}.map { it.length }.toList()
-    if (damagedSpringsIs.size != damagedSpringsShould.size) {
-        return false
-    }
-    damagedSpringsIs.zip(damagedSpringsShould).forEach { (isLength, shouldLength) ->
-        if (isLength != shouldLength) {
-            return false
+    if (springGroup.contains('?')) {
+        val springGroupNew = springGroup.split("?")[0]
+        val damagedSpringsIs = springGroupNew.split(".").filter{it != ""}.map { it.length }.toList()
+        damagedSpringsIs.zip(damagedSpringsShould).forEach { (isLength, shouldLength) ->
+            if (isLength > shouldLength) {
+                return false
+            }
         }
+
+        return true
+    } else {
+        val damagedSpringsIs = springGroup.split(".").filter{it != ""}.map { it.length }.toList()
+        damagedSpringsIs.zip(damagedSpringsShould).forEach { (isLength, shouldLength) ->
+            if (isLength != shouldLength) {
+                return false
+            }
+        }
+        return damagedSpringsIs.size == damagedSpringsShould.size
     }
-    return true
+
 }
 
 private fun processSprings(springGroups: List<String>, finished: MutableList<String>, damagedSprings: List<Int>): MutableList<String> {
     val newSpringGroups = mutableListOf<String>()
     for (springGroup in springGroups) {
         if (springGroup.all{it != '?'} ) {
-            if (checkSpringGroup(springGroup, damagedSprings)) {
-                finished.add(springGroup)
-            }
+            finished.add(springGroup)
             continue
         }
 
         val index = springGroup.indexOf('?')
-        var newSpringGroup = springGroup.toMutableList()
-        newSpringGroup[index] = '.'
-        newSpringGroups.add(newSpringGroup.joinToString(""))
-        newSpringGroup = springGroup.toMutableList()
-        newSpringGroup[index] = '#'
-        newSpringGroups.add(newSpringGroup.joinToString(""))
+        var newSpringGroupList = springGroup.toMutableList()
+        newSpringGroupList[index] = '.'
+        var newSpringGroup = newSpringGroupList.joinToString("")
+        if (checkSpringGroup(newSpringGroup, damagedSprings)) {
+            newSpringGroups.add(newSpringGroup)
+        }
+        newSpringGroupList = springGroup.toMutableList()
+        newSpringGroupList[index] = '#'
+        newSpringGroup = newSpringGroupList.joinToString("")
+        if (checkSpringGroup(newSpringGroup, damagedSprings)) {
+            newSpringGroups.add(newSpringGroup)
+        }
     }
     if (newSpringGroups.isNotEmpty()) {
         processSprings(newSpringGroups, finished, damagedSprings)
